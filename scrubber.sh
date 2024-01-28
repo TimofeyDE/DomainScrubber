@@ -13,7 +13,7 @@ GREEN="\033[1;32m"
 
 #################### VARIABLES ####################
 # Database credentials: to specify a filepath to the config file
-CONF="config.cnf"
+CONF=
 
 # Database name
 DB_NAME="dbemage"
@@ -26,6 +26,13 @@ FILE_PATH="brokenDomain.csv"
 
 # To save up domains that were processed
 declare -A PROCESSED_DOMAINS
+
+
+if [[ -n $1 && "$1" =~ \.cnf$ ]];
+then
+    echo "$1" "is correct config file"
+    CONF="$1"
+fi
 
 #################### FUNCTION ####################
 # Function to escape SQL strings
@@ -40,10 +47,11 @@ update_record() {
     local DOMAIN="$3"
 
     # Remove DOMAIN from news_content and escape for SQL
-    local NEW_VALUE=$(echo "$VALUE" | sed -E "s#href=['\"]https?://www\.$DOMAIN['\"]##gi" |sql_escape)
+    local NEW_VALUE=$(echo "$VALUE" | sed -E "s# href=['\"]https?://www\.$DOMAIN['\"]##gi" | sql_escape)
 
     # Construct and execute the update query
     local UPDATE_SQL="UPDATE $DB_ENTITY SET NewsContent = '$NEW_VALUE' WHERE id LIKE $ID;"
+
     if mysql --defaults-extra-file="$CONF" "$DB_NAME" -e "$UPDATE_SQL"; 
     then
         return 0
@@ -71,18 +79,20 @@ process_domain() {
         if update_record "$ID" "$VALUE" "$DOMAIN"; 
         then
             ((UPDATE_COUNT++))
+        else
+            echo -ne "${RED}The record was not updated${CLEAR}"
         fi
     done < <(mysql --defaults-extra-file="$CONF" "$DB_NAME" -e "$EXTRACT_SQL" | sed '1d')
 
-    if [[ -z "$COUNT" && "$UPDATE_COUNT" -eq "$COUNT" ]];
+    if [[ "$COUNT" -ne 0 && "$UPDATE_COUNT" -eq "$COUNT" ]];
     then
-        echo -e "${BOLD}${UPDATE_COUNT}${CLEAR} records of the domain ${BOLD}\"${DOMAIN}\"${CLEAR} updated successfully."
+        echo -e "${BOLD}${UPDATE_COUNT}${CLEAR} records for domain ${BOLD}\"${DOMAIN}\"${CLEAR} updated successfully."
     else
         if [ "$UPDATE_COUNT" -eq 0 ];
         then
             echo -e "Records for domain ${BOLD}\"${DOMAIN}\"${CLEAR} were not found!"
         else
-            echo -e "Some records ${BOLD}\"${UPDATE_COUNT}\"${CLEAR} may not have been updated."
+            echo -e "Some records for domain ${BOLD}\"${DOMAIN}\"${CLEAR} may not have been updated."
         fi
     fi
 }
