@@ -1,8 +1,8 @@
 # DomainScrubber
 
 ## Introduction
-This script is designed to update news content entries in a database by removing specific domain references
-from the news content. It reads a list of domains from a CSV file and processes each domain by updating the
+This script is designed to update the content entries in a database by removing specific domain references
+from the content. It reads a list of domains from a CSV file and processes each domain by updating the
 relevant records in the database to ensure that the content does not contain links to these domains.
 
 ## Table of Contents
@@ -17,7 +17,7 @@ relevant records in the database to ensure that the content does not contain lin
 - [Pull Requests](#pull-requests)
 
 ## Features
-- **Domain Processing**: Removes domain references from the news content stored in a database.
+- **Domain Processing**: Removes domain references from the content stored in a database.
 - **CSV Domain List**: Reads domains from a CSV file, allowing for easy batch processing.
 - **Database Integration**: Connects to a MySQL database using a configuration file to perform updates.
 - **Error Handling**: Provides clear error messages for common issues such as missing arguments or incorrect
@@ -26,7 +26,7 @@ relevant records in the database to ensure that the content does not contain lin
 ## Requirements
 - Bash shell environment
 - MySQL client installed and accessible from the command line
-- Access to a MySQL database with the relevant news content
+- Access to a MySQL database with the relevant content
 
 ## Installation
 This script does not require a traditional installation. However, you need to ensure that it has executable permissions.
@@ -44,7 +44,7 @@ access.
 
 ### Options
 - `-f <file_path.csv>`: Specifies the path to the CSV file containing the domains to process.
-- `-d <database_name>`: Specifies the name of the database containing the news content.
+- `-d <database_name>`: Specifies the name of the database containing the content.
 - `-e <db_entity>`: Specifies the database entity (table) where the content is stored.
 - `-c <config_file.cnf>`: Specifies the path to the MySQL configuration file containing database access credentials.
 
