@@ -1,7 +1,5 @@
 # DomainScrubber
 
-# News Content Updater Script
-
 ## Introduction
 This script is designed to update news content entries in a database by removing specific domain references
 from the news content. It reads a list of domains from a CSV file and processes each domain by updating the
