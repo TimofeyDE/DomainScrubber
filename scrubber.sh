@@ -3,38 +3,13 @@
 # Debugging
 #set -x n
 
-#################### FORMATING ####################
-CLEAR="\033[0m"
-
-# Text settings.
-BOLD="\033[1m"
-RED="\033[1;31m"
-GREEN="\033[1;32m"
-
-#################### VARIABLES ####################
-# Database credentials: to specify a filepath to the config file
-CONF=
-
-# Database name
-DB_NAME="dbemage"
-
-# Enter the name of attribute 
-DB_ENTITY="Emage_News"
-
-# Enter the path to your CSV file
-FILE_PATH="brokenDomain.csv"
-
-# To save up domains that were processed
-declare -A PROCESSED_DOMAINS
-
-
-if [[ -n $1 && "$1" =~ \.cnf$ ]];
-then
-    echo "$1" "is correct config file"
-    CONF="$1"
-fi
-
 #################### FUNCTION ####################
+# Function to print usage
+usage() {
+    echo "Usage: $0 -f <file_path.csv> -d <database_name> -e <db_entity> [-c <config_file.cnf>]"
+    exit 1
+}
+
 # Function to escape SQL strings
 sql_escape() {
     sed "s/'/''/g"
@@ -96,6 +71,77 @@ process_domain() {
         fi
     fi
 }
+
+#################### FORMATING ####################
+CLEAR="\033[0m"
+
+# Text settings.
+BOLD="\033[1m"
+RED="\033[1;31m"
+GREEN="\033[1;32m"
+
+#################### VARIABLES ####################
+# Database credentials: to specify a filepath to the config file
+CONF=
+
+# Enter the path to your CSV file
+FILE_PATH=
+
+# Database name
+DB_NAME=
+
+# Enter the name of attribute 
+DB_ENTITY=
+
+# To save up domains that were processed
+declare -A PROCESSED_DOMAINS
+
+# Parse command-line arguments
+while getopts ":f:d:e:c:" opt; 
+do
+    case ${opt} in
+        f )
+            FILE_PATH=$OPTARG
+            ;;
+        d )
+            DB_NAME=$OPTARG
+            ;;
+        e )
+            DB_ENTITY=$OPTARG
+            ;;
+        c )
+            CONF=$OPTARG
+            ;;
+        \? )
+        echo "Invalid Option: -$OPTARG" 1>&2 usage
+        ;;
+        : )
+        echo "Invalid Option: -$OPTARG requires an argument" 1>&2 usag
+        ;;
+    esac
+done
+
+shift $((OPTIND -1))
+
+# Validate required arguments
+if [[ -z "$FILE_PATH" || -z "$DB_NAME" || -z "$DB_ENTITY" ]];
+then
+    usage
+fi
+
+# Validate CSV file
+if ! [[ "$FILE_PATH" =~ \.csv$ ]];
+then
+    echo "Input file must be a CSV file." 
+    exit 1
+fi
+
+# Validate config file if specified
+if [[ -n "$CONF" && ! "$CONF" =~ \.cnf$ ]];
+then
+    echo "The config file must have a .cnf extension."
+    exit 1
+fi
 
 #################### CORE LOGIC ####################
 
